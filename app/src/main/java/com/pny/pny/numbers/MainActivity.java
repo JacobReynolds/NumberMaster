@@ -2,6 +2,7 @@ package com.pny.pny.numbers;
 
 import android.app.Dialog;
 import android.content.SharedPreferences;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -39,28 +40,31 @@ public class MainActivity extends ActionBarActivity {
     public void deleteNumber(View view) {
         EditText numberInput = (EditText)findViewById(R.id.numberOutput);
         String numberText = numberInput.getText().toString();
-
-        if (numberText.length() == 1)
+        if (numberText.length() == 0) {
+        }
+        else if (numberText.length() == 1)
             numberInput.setText("");
         else
             numberInput.setText(numberText.substring(0, numberText.length() - 1));
-
     }
 
-    public void submitNumber(View view) throws IOException {
+    public void submitNumber(View view) throws IOException, InterruptedException {
         EditText numberInput = (EditText)findViewById(R.id.numberOutput);
         String numberText = numberInput.getText().toString();
 
         TextView congratsView = (TextView)findViewById(R.id.congrats);
-        if (Integer.parseInt(numberText) == magicNumber) {
+        if (numberText.equals("")) {
+            return;
+        } else if (Integer.parseInt(numberText) == magicNumber) {
             congratsView.setText("congrats");
             numberInput.setText("");
             increaseRange();
+            animateButtons();
             new File(getFilesDir(), "previousNumbers").delete();
             previousNumbers = new ArrayList<>();
 
         } else if (previousNumbers.contains(Integer.parseInt(numberText))) {
-            congratsView.setText("number already guessed");
+            congratsView.setText("already guessed");
             numberInput.setText("");
         } else {
             congratsView.setText("");
@@ -84,6 +88,46 @@ public class MainActivity extends ActionBarActivity {
             }
         }
     }
+
+    public void animateButtons() throws InterruptedException {
+        ArrayList<Button> buttonList = new ArrayList();
+        buttonList.add((Button)findViewById(R.id.b1));
+        buttonList.add((Button)findViewById(R.id.b2));
+        buttonList.add((Button)findViewById(R.id.b3));
+        buttonList.add((Button)findViewById(R.id.b4));
+        buttonList.add((Button)findViewById(R.id.b5));
+        buttonList.add((Button)findViewById(R.id.b6));
+        buttonList.add((Button)findViewById(R.id.b7));
+        buttonList.add((Button)findViewById(R.id.b8));
+        buttonList.add((Button)findViewById(R.id.b9));
+        buttonList.add((Button)findViewById(R.id.deleteButton));
+        buttonList.add((Button)findViewById(R.id.b0));
+        buttonList.add((Button)findViewById(R.id.enterButton));
+
+        for(Button button : buttonList) {
+            button.setClickable(false);
+        }
+
+        int j = 0;
+        for (int i = 0; i < 10; i++) {
+            for (Button button : buttonList) {
+                j += 1;
+                runnable run = new runnable();
+                Handler handler = new Handler();
+                run.setParams(button, Integer.toString(i), false);
+                handler.postDelayed(run, j*35);
+            }
+        }
+        for (Button button : buttonList) {
+            j += 1;
+            runnable run = new runnable();
+            Handler handler = new Handler();
+            run.setParams(button, button.getTag().toString(), true);
+            handler.postDelayed(run, j*35);
+        }
+    }
+
+
 
     public void restart(View view) {
         final Dialog dialog = new Dialog(this);
